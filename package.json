@@ -1,0 +1,8 @@
+{
+  "name": "ai-social-post-generator",
+  "version": "1.0.0",
+  "description": "AI Social Post Generator serverless function dependencies",
+  "dependencies": {
+    "@google/genai": "^1.30.0"
+  }
+}

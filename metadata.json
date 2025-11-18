@@ -1,0 +1,5 @@
+{
+  "name": "AI Social Post Generator",
+  "description": "A SaaS tool that uses AI to adapt a single post for multiple social media platforms like Twitter, LinkedIn, and Instagram, tailoring the tone, length, and hashtags for each.",
+  "requestFramePermissions": []
+}
