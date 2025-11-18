@@ -1,89 +1,11 @@
-import { GoogleGenAI } from "@google/genai";
-import { Platform } from "../../types";
+[build]
+  # No build command needed (static + importmap)
+  publish = "."
 
-// This handler will be executed by Netlify's serverless environment
-export const handler = async (event: { httpMethod: string, body: string }) => {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  included_files = ["netlify/functions/**/*"]
 
-  try {
-    const { platform, basePost } = JSON.parse(event.body);
-
-    if (!platform || !basePost) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Missing platform or basePost in request body' }),
-      };
-    }
-    
-    // Securely initialize GenAI with the API key from environment variables
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const prompt = getPlatformPrompt(platform, basePost);
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        temperature: 0.7,
-        topP: 0.95,
-      }
-    });
-    
-    const content = response.text.trim();
-
-    return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ content }),
-    };
-  } catch (error) {
-    console.error('Error in serverless function:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error instanceof Error ? error.message : 'An internal server error occurred.' }),
-    };
-  }
-};
-
-
-// --- Prompt generation logic (moved from the original service) ---
-
-const getPlatformPrompt = (platform: Platform, basePost: string): string => {
-  switch (platform) {
-    case Platform.Twitter:
-      return `You are a professional social media manager. Adapt the following post for Twitter/X.
-      Your response MUST follow these rules:
-      1. Be concise and impactful, strictly under 280 characters.
-      2. Use a casual and engaging tone.
-      3. Include 2-3 relevant and trending hashtags.
-      4. Do not include any introductory text like "Here's a version for Twitter:". Output only the post content.
-      
-      Original post: "${basePost}"`;
-    case Platform.LinkedIn:
-      return `You are a professional social media manager. Adapt the following post for LinkedIn.
-      Your response MUST follow these rules:
-      1. Be professional, insightful, and add value to a professional audience.
-      2. Structure the post with clear paragraphs for readability.
-      3. Encourage discussion by ending with a thoughtful question.
-      4. Include 3-5 relevant professional hashtags.
-      5. Do not include any introductory text like "Here's the LinkedIn version:". Output only the post content.
-
-      Original post: "${basePost}"`;
-    case Platform.Instagram:
-      return `You are a professional social media manager. Create an engaging Instagram caption for the following post.
-      Your response MUST follow these rules:
-      1. Start with a strong hook to grab attention.
-      2. Be visually descriptive and use storytelling.
-      3. Use emojis to add personality and break up text.
-      4. Include a clear call-to-action (e.g., "link in bio", "comment below").
-      5. Provide 5-7 relevant and popular hashtags.
-      6. Do not include any introductory text like "Here is an Instagram caption:". Output only the caption.
-
-      Original post: "${basePost}"`;
-    default:
-      return `Rewrite this post: "${basePost}"`;
-  }
-};
+[build.environment]
+  API_KEY = "AIzaSyCXyejFb-xTE1FJFFwAm91vGuiYo9sEEv8"
